@@ -1,0 +1,189 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    Layout = null;
+
+    DatabaseEntities de = new DatabaseEntities();
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Messages</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/assets/images/Favicons/C-Fav.jpg">
+
+
+    <!-- Global stylesheets -->
+    <link href="~/Content/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- Theme JS files -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/switchery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/ui/moment/moment.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/pickers/daterangepicker.js"></script>
+
+    <script type="text/javascript" src="~/Content/assets/js/core/app.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/pages/dashboard.js"></script>
+    <!-- /theme JS files -->
+    <!-- /Custom add libraries -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <link href="~/Content/assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/icons/fontawesome/fonts/fontawesome-webfont.svg" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+
+
+
+    <div id="chatHeader">
+    <input type="hidden" id="compId" value="@ViewBag.Chat.CompanyId" />
+    <input type="hidden" id="chatId" value="@ViewBag.Chat.Id" />
+    <input type="hidden" id="agentId" value="@ViewBag.Chat.AgentId" />
+        <div class="panel-heading" style="background-color:#0150A1; padding:5px; height:50px;">
+            @if (ViewBag.Chat.AgentId != null)
+            {
+
+                string name = ViewBag.Chat.User.Name;
+                if (name.Length > 15)
+                {
+                    name = name.Substring(0, 15) + "..,";
+                }
+                @*<div class="bg-info-800 pull-left" style="border-radius:100%; width:10px; height:10px;"></div>*@
+                <h6 class="panel-title text-white text-bold">
+                    @if (ViewBag.MsgCount > 0 && ViewBag.MsgCount < 100)
+                    {
+                        <span class="badge badge-danger" >@ViewBag.MsgCount</span>
+                    }
+                    else if (ViewBag.MsgCount > 99)
+                    {
+                        <span class="badge badge-danger" >99+</span>
+                    }
+
+                    &nbsp; <span title="Chating With @ViewBag.Chat.User.Name" style="margin-left:-6px;">@name</span>
+
+                    @if (ViewBag.Chat.User.IsLive == 1)
+                    {
+                        <span class="badge badge-success">Online</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Offline</span>
+                    }
+                </h6>
+                <small class="text-size-mini text-white initialClass" id="typeStatus" style="display:none">Typing...</small>
+
+            }
+            else
+            {
+                int chatCount = new ChatMessageBL().GetActiveChatMessageList((int)ViewBag.Chat.Id, de).Count();
+                if (chatCount == 0)
+                {
+                    <h6 class="panel-title text-white text-bold" style="margin-top:9px; margin-left:15px;">
+                        <i class="icon-help"></i>&nbsp; Get Help
+                        @*<a onclick="RefreshChat()" class="pull-right" title="Refresh Chat"><i class="icon-reload-alt"></i></a>*@
+                    </h6>
+                }
+                else
+                {
+                    <h6 class="panel-title text-white text-bold" style="margin-top:9px; margin-left:15px;">
+                         &nbsp; Waiting...
+                        @*<a onclick="RefreshChat()" class="pull-right" title="Refresh Chat"><i class="icon-reload-alt"></i></a>*@
+                    </h6>
+                }
+            }
+
+        </div>
+    </div>
+
+
+    <script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+
+        var compId = $('#compId').val();
+        var chatId = $('#chatId').val();
+        var agentId = $('#agentId').val();
+
+        var chat = $.connection.chatHub; //get connection with class named "ChatHub" in DataHub folder (ChatHub.cs)
+
+        $.connection.hub.start().done(function () //this function is always required in order to work SignalR
+        {
+        });
+
+        chat.client.broadcastAgentMessage = function (response, agentid, companyId) {
+            if (compId == companyId && agentid == $('#agentId').val()) {
+                if (response == "1") {
+                    $("#chatHeader").load(location.href + " #chatHeader");
+                }
+                else if (response == "2") {
+                    alert("Chat closed by Agent, Please check your Email")
+                    $("#chatHeader").load(location.href + " #chatHeader");
+                }
+            }
+        };
+
+
+        chat.client.broadcastUserStatus = function (response, agentid, companyId) {
+            if ($('#agentId').val() == agentid && compId == companyId) {
+                if (response == "1") {
+                    $("#chatHeader").load(location.href + " #chatHeader");
+                }
+            }
+        };
+
+        chat.client.broadcastUpdateClientChatHead = function (response, companyId, chtId) {
+            if (response == "1")
+            {
+                if (compId == companyId && $('#chatId').val() == chtId)
+                {
+                    $("#chatHeader").load(location.href + " #chatHeader");
+                }
+
+            }
+        };
+
+        chat.client.broadcastClientTypingStatus = function (status, cId)
+        {
+            if ($('#chatId').val() == cId)
+            {
+                if ($('#typeStatus').hasClass('initialClass')) {
+                    if (status == 1) {
+                        $('#typeStatus').removeClass('initialClass');
+                        $('#typeStatus').show();
+
+                        setTimeout(function () {
+                            $('#typeStatus').addClass('initialClass');
+                            $('#typeStatus').hide();
+                        }, 2500);
+                    }
+                }
+
+            }
+        };
+
+    </script>
+
+</body>
+</html>

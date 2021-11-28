@@ -1,0 +1,75 @@
+﻿
+@{
+    ViewBag.Title = "New Agent";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<div class="content bg-white m-10">
+    <br />
+    <br />
+
+    <div class="row" style="height:700px;">
+        <form action="@Url.Action("PostAddUser", "Company")" method="post">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <div class="text-left" id="alertMsg" style="color:@ViewBag.Color ; font-weight:bold">
+                                @ViewBag.Message
+                            </div>
+
+                            <h3 class="panel-title" align="center"><u>Add New Agent</u></h3>
+
+                        </div>
+
+                        <div class="panel-body">
+
+
+                            <div class="form-group">
+                                <label class="text-bold">Name</label>
+                                <input type="text" name="Name" class="form-control" placeholder="Enter Full Name Here" required>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Contact</label>
+                                <input type="text" name="Contact" class="form-control" placeholder="Add Contact Number Here" required>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Address</label>
+                                <input type="text" name="Address" class="form-control" placeholder="Enter Address Here" required>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Email</label>
+                                <input type="email" name="Email" class="form-control" placeholder="Add Users' Email Here" required>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Password</label>
+                                <input type="text" name="Password" class="form-control" placeholder="Set User Login Password" required>
+
+                            </div>
+
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn buttonColor">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+

@@ -1,0 +1,59 @@
+﻿
+@{
+    ViewBag.Title = "Update Theme";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<div class="content bg-white m-10">
+    <br />
+    <br />
+
+    <div class="row" style="height:700px;">
+        <form action="@Url.Action("PostUpdateTheme", "Auth")" method="post">
+
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+
+                    <div class="panel panel-flat">
+                        <div class="panel-heading">
+
+                            <div class="text-left" id="alertMsg" style="color:@ViewBag.Color ; font-weight:bold">
+                                @ViewBag.Message
+                            </div>
+
+                            <h3 class="panel-title" align="center"><u>Set Theme Colors</u></h3>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            <input type="hidden" name="Id" value="@ViewBag.Company.Id" />
+                            <div class="form-group">
+                                <label class="text-bold">Nav Bar</label>
+                                <input type="color" name="NavbarColor" class="form-control" style="height:60px;" value="@ViewBag.Company.NavbarColor" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-bold">Buttons</label>
+                                <input type="color" name="ButtonColor" class="form-control" style="height:60px;"  value="@ViewBag.Company.ButtonColor" required>
+
+                            </div>
+
+                            <input type="hidden" name="OtherColor" class="form-control"  value="@ViewBag.Company.OtherColor" required>
+                           
+
+
+                            <div class="text-right">
+                                <button type="submit" id="subBtn" class="btn buttonColor">Add <i class="icon-database-insert position-right"></i></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+

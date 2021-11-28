@@ -1,0 +1,376 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    DatabaseEntities de = new DatabaseEntities();
+
+    var identity = (System.Security.Claims.ClaimsPrincipal)System.Threading.Thread.CurrentPrincipal;
+    var id = identity.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Sid).Select(c => c.Value).SingleOrDefault();
+    User loggedinUser = new UserBL().GetUserById(Convert.ToInt32(id), de);
+
+}
+
+@{
+    ViewBag.Title = "Chating";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<style>
+    #msgList ::-webkit-scrollbar {
+        width: .5em;
+        height: 2em
+    }
+
+    #msgList ::-webkit-scrollbar-button {
+        background: #ccc
+    }
+
+    #msgList ::-webkit-scrollbar-track-piece {
+        background: #ccc;
+    }
+
+    #msgList ::-webkit-scrollbar-thumb {
+        background: #42a5f5
+    }
+
+
+</style>
+
+
+<input type="hidden" id="chatId" value="@ViewBag.Chat.Id" />
+<input type="hidden" id="senderId" value="@loggedinUser.Id" />
+<input type="hidden" id="companyId" value="@loggedinUser.CompanyId" />
+
+<div class="modal" id="closeChatModal">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title text-center">Do You Want to Close Chat?</h4>
+                <button type="button" class="close text-danger" data-dismiss="modal">&times;</button>
+
+            </div>
+
+
+
+            <!-- Modal footer -->
+            <div class="modal-footer text-center">
+                <a class="btn btn-primary" onclick="closeChat()">Yes <i class="icon-spinner spinner" style="display:none;" id="closeSpin"></i></a>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row ml-10 mr-10" style="min-height:700px;">
+
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8 m-10 p-5" style="border:1px solid lightgrey; border-radius:5px;">
+        <div id="chatHead">
+            <div class="panel-heading navbarColor" style="height: 62px;">
+                @{
+                    string name = ViewBag.Chat.User1.Name;
+                    if (name.Length > 15)
+                    {
+                        name = name.Substring(0, 15) + "..,";
+                    }
+                }
+
+
+                <h6 class="panel-title text-white text-bold">
+                    &nbsp; <span title="Chating With @ViewBag.Chat.User1.Name">@name</span>
+
+                    @if (ViewBag.Chat.User1.IsLive == 1)
+                    {
+                        <span class="badge badge-success">Online</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Offline</span>
+                    }
+
+                    <span class="dropdown pull-right">
+
+                        <i class="icon-menu3 dropdown-toggle" data-toggle="dropdown"></i>
+                        <span class="dropdown-menu p-10">
+                            <a style="color:black; padding-right:60px;" data-toggle="modal" data-target="#closeChatModal"><i class="icon-cross2 text-danger"></i> &nbsp; Close Chat </a>
+                            <hr />
+                            <a onclick="RefreshChat()" style="color:black; padding-right:50px;" title="Refresh Chat"><i class="fa fa-refresh text-info"></i>&nbsp;&nbsp;&nbsp; Refresh Chat</a>
+                        </span>
+                    </span> 
+                </h6>
+
+                <small class="ml-10 text-size-mini text-white initialClass" id="typeStatus" style="display:none; margin-top:-10px;">Typing...</small>
+
+            </div>
+        </div>
+        <div class="panel-body" style="overflow:hidden">
+
+            <textarea name="Message" id="message" class="form-control content-group" rows="3" cols="1" placeholder="Enter your message..." style="resize:none;"></textarea>
+
+            <div class="row">
+
+                <div class="col-xs-6">
+                    <ul class="icons-list icons-list-extended mt-10">
+                        @*<li><a href="#" data-popup="tooltip" title="" data-container="body" data-original-title="Send video"><i class="icon-file-video"></i></a></li>*@
+                    </ul>
+                </div>
+
+                <center class="">
+                    <button type="button" id="sendMsg" class="btn bg-teal-400 btn-labeled btn-labeled-right btn-block legitRipple"><b><i class="icon-circle-right2" id="sendSpinner"></i></b> Send</button>
+                </center>
+
+            </div>
+            <br />
+            <div id="msgList">
+                <ul class="media-list chat-list content-group" style="height:300px">
+
+                    @if (ViewBag.MsgList != null)
+                    {
+                        foreach (ChatMessage c in ViewBag.MsgList)
+                        {
+                            if (loggedinUser.Id == c.SenderId)
+                            {
+                                <li class="media reversed">
+                                    <div class="media-body">
+                                        <div class="media-content" style="width:150px; margin-right:-10px;  word-wrap: break-word;">
+                                            @c.Message
+                                        </div>
+                                        <span class="media-annotation display-block mt-10">
+                                            @Convert.ToDateTime(c.CreatedAt).ToString("dddd, dd MMMM yyyy")
+                                            <br />
+                                            @Convert.ToDateTime(c.CreatedAt).ToString("HH:mm:ss")
+                                        </span>
+                                    </div>
+
+                                    <div class="media-right" style="padding-top: 10px;">
+                                        <span class="text-bold" style="margin-right:5px;">You</span>
+                                    </div>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="media">
+                                    <div class="media-left">
+                                        <span class="text-bold" title="@c.ChatRoom.User1.Name">@name</span>
+                                    </div>
+
+                                    <div class="media-body">
+                                        <div class="media-content" style="width:150px; margin-left:-10px; word-wrap: break-word;">
+                                            @c.Message
+                                        </div>
+                                        <span class="media-annotation display-block mt-10">
+                                            @Convert.ToDateTime(c.CreatedAt).ToString("dddd, dd MMMM yyyy")
+                                            <br />
+                                            @Convert.ToDateTime(c.CreatedAt).ToString("HH:mm:ss")
+                                        </span>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    }
+
+                </ul>
+
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> @*This library is required in order to work signalR*@
+<script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script type="text/javascript">
+
+    var chatId = $('#chatId').val();
+    var senderId = $('#senderId').val();
+    var comId = $('#companyId').val();
+
+    function RefreshChat()
+    {
+        $('#sendSpinner').removeClass('icon-spinner spinner');
+        $('#sendSpinner').addClass('icon-circle-right2');
+
+        $("#msgList").load(location.href + " #msgList");
+
+        $('#sendMsg').removeClass('bg-danger-400');
+        $('#sendMsg').addClass('bg-teal-400');
+
+        clearUnreadMsg();
+    }
+
+    $(function ()
+    {
+        var chat = $.connection.chatHub; //get connection with class named "ChatHub" in DataHub folder (ChatHub.cs)
+
+        $.connection.hub.start().done(function ()
+        {
+            
+            $("#message").keyup(function ()
+            {
+                chat.server.sendTypingStatus(1, chatId, 1);
+            });
+
+            $("#message").keypress(function (e)
+            {
+                if (event.keyCode == 13 && !event.shiftKey) {
+                    e.preventDefault();
+                    $('#sendMsg').click();
+                }
+
+            });
+
+            $('#sendMsg').click(function () //calling the function named "SendMessage" in DataHub -> ChatHub.cs class
+            {
+                if ($.trim($('#message').val()) == "")
+                {
+                    $('#sendMsg').removeClass('bg-teal-400');
+                    $('#sendMsg').addClass('bg-danger-400');
+                    $('#message').val("").focus();
+                }
+                else
+                {
+                    $('#sendSpinner').removeClass('icon-circle-right2');
+                    $('#sendSpinner').addClass('icon-spinner spinner');
+                    
+                    $('#sendMsg').removeClass('bg-danger-400');
+                    $('#sendMsg').addClass('bg-teal-400');
+                    var message = $('#message').val();
+
+                    chat.server.sendTypingStatus(0, chatId, 1);
+                    chat.server.sendMessage(chatId, senderId, message); //function name must start with small word for calling, not defining
+
+                    $('#message').val('').focus();
+
+                    setTimeout(function () {
+                        if ($('#sendSpinner').hasClass('icon-spinner')) {
+                            RefreshChat();
+                        }
+                    }, 3000);
+                }
+
+            });
+        });
+
+        chat.client.broadcastAgentMessage = function (response, logedInId, companyId) //response function it will be called from the function named "SendMessage(...)" of ChatHub.cs class
+        {
+            if (response == "1")
+            {
+                if (logedInId == senderId && companyId == comId)
+                {
+                    clearUnreadMsg();
+
+                    $('#sendSpinner').removeClass('icon-spinner spinner');
+                    $('#sendSpinner').addClass('icon-circle-right2');
+
+                    $("#msgList").load(location.href + " #msgList");
+                }
+
+            }
+            else if (response == "2")
+            {
+                if (logedInId == senderId && companyId == comId) {
+                    location.reload();
+                }
+            }
+            else {
+                alert("Message Sending failed!");
+            }
+
+        };
+
+
+        chat.client.broadcastUserStatus = function (response, userId, companyId) {
+            if (response == "1")
+            {
+                if (companyId == comId) {
+                    $("#chatHead").load(location.href + " #chatHead");
+                }
+            }
+        };
+
+        chat.client.broadcastClientTypingStatus = function (status, cId, from)
+        {
+
+            if (cId == $('#chatId').val()) {
+                if (status == 1)
+                {
+                    if (from == 2) {
+                        if ($('#typeStatus').hasClass('initialClass')) {
+                            $('#typeStatus').removeClass('initialClass');
+                            $('#typeStatus').show();
+
+                            setTimeout(function () {
+                                $('#typeStatus').addClass('initialClass');
+                                $('#typeStatus').hide();
+                            }, 2500);
+                        }
+                    }
+                }
+                else {
+                    $('#typeStatus').addClass('initialClass');
+                    $('#typeStatus').hide();
+                }
+            }
+        };
+
+    });
+
+    
+    function closeChat()
+    {
+        $("#closeSpin").show();
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: '@Url.Action("CloseChat", "Agent")',
+            data: { chatId: chatId},
+            success: function (response)
+            {
+                if (response == "1")
+                {
+                    location.reload();
+                }
+                else
+                {
+                    alert("Somethings' Wrong");
+                }
+            },
+            error: function (response)
+            {
+                alert('Ajax Failed');
+            }
+
+        });
+    }
+</script>
+
+<script>
+
+    clearUnreadMsg();
+
+    function clearUnreadMsg()
+        {
+            $.ajax({
+                dataType: "json",
+                type: "POST",
+                url: '@Url.Action("GetClearUnreadMsg", "Client")',
+                data: { chatId: chatId },
+                success: function (response)
+                {
+
+                },
+                error: function (response)
+                {
+                    alert('Error Updating Unread Messages');
+                }
+
+            });
+        }
+</script>

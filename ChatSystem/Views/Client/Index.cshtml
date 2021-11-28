@@ -1,0 +1,241 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    DatabaseEntities de = new DatabaseEntities();
+
+    var identity = (System.Security.Claims.ClaimsPrincipal)System.Threading.Thread.CurrentPrincipal;
+    var id = identity.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Sid).Select(c => c.Value).SingleOrDefault();
+    User loggedinUser = new UserBL().GetUserById(Convert.ToInt32(id), de);
+
+}
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+
+<input type="hidden" id="chatId" value="@ViewBag.Chat.Id" />
+<input type="hidden" id="senderId" value="@loggedinUser.Id" />
+<input type="hidden" id="companyId" value="@loggedinUser.CompanyId" />
+
+<div class="row" style="min-height:700px;">
+
+    <br />
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8 m-10 p-5" style="border:1px solid lightgrey; border-radius:5px;">
+        <div id="chatHead">
+            <div class="panel-heading navbarColor">
+                @if (ViewBag.Chat.AgentId != null)
+                {
+                    if (ViewBag.Chat.User.IsLive == 1)
+                    {
+                        <div class="bg-info-800 pull-left" style="border-radius:100%; width:10px; height:10px;"></div>
+                    }
+                    <h6 class="panel-title text-white text-bold">&nbsp; @ViewBag.Chat.User.Name</h6>
+                }
+                else
+                {
+                    <h6 class="panel-title text-white text-bold">&nbsp; Waiting... </h6>
+                }
+
+            </div>
+        </div>
+        <div class="panel-body" style="overflow:hidden">
+            @if (ViewBag.Chat.IsActive == 1)
+            {
+                <textarea name="Message" id="message" class="form-control content-group" rows="3" cols="1" placeholder="Enter your message..." style="resize:vertical;"></textarea>
+            }
+            <center class="row">
+                @if (ViewBag.Chat.IsActive == 1)
+                {
+                    <div class="">
+                        <button type="button" id="sendMsg" class="btn bg-teal-400 btn-labeled btn-labeled-right btn-block legitRipple"><b><i class="icon-circle-right2"></i></b> Send</button>
+                    </div>
+                }
+                else
+                {
+                    <center class="text-danger">This Chat has been closed by Agent</center>
+                }
+            </center>
+            <br />
+            <div id="msgList" class="scroll">
+                <ul class="media-list chat-list content-group" style="height:300px">
+
+                    @if (ViewBag.MsgList != null)
+                    {
+                        foreach (ChatMessage c in ViewBag.MsgList)
+                        {
+                            if (loggedinUser.Id == c.SenderId)
+                            {
+                                <li class="media reversed">
+                                    <div class="media-body">
+                                        <div class="media-content">@c.Message</div>
+                                        <span class="media-annotation display-block mt-10">@Convert.ToDateTime(c.CreatedAt).ToString("dddd, dd MMMM yyyy")</span>
+                                    </div>
+
+                                    <div class="media-right">
+                                        <span class="text-bold">You</span>
+                                    </div>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="media">
+                                    <div class="media-left">
+                                        <span class="text-bold">@c.ChatRoom.User.Name</span>
+                                    </div>
+
+                                    <div class="media-body">
+                                        <div class="media-content">@c.Message</div>
+                                        <span class="media-annotation display-block mt-10">@Convert.ToDateTime(c.CreatedAt).ToString("dddd, dd MMMM yyyy")</span>
+                                    </div>
+                                </li>
+                            }
+                        }
+                    }
+
+
+                    @*<li class="media">
+                            <div class="media-left">
+                                <span class="text-bold">Agent</span>
+                            </div>
+
+                            <div class="media-body">
+                                <div class="media-content">Below mounted advantageous spread yikes bat stubbornly crud a and a excepting</div>
+                                <span class="media-annotation display-block mt-10">Mon, 9:54 am</span>
+                            </div>
+                        </li>
+
+                        <li class="media reversed">
+                            <div class="media-body">
+                                <div class="media-content">Far squid and that hello fidgeted and when. As this oh darn but slapped casually husky sheared that cardinal hugely one and some unnecessary factiously hedgehog a feeling one rudely much but one owing sympathetic regardless more astonishing evasive tasteful much.</div>
+                                <span class="media-annotation display-block mt-10">Mon, 10:24 am </span>
+                            </div>
+
+                            <div class="media-right">
+                                <span class="text-bold">You</span>
+                            </div>
+                        </li>*@
+
+
+                    @*<li class="media date-step">
+                            <span>Today</span>
+                        </li>
+
+                        <li class="media">
+                            <div class="media-left">
+                                <a href="assets/images/placeholder.jpg">
+                                    <img src="assets/images/placeholder.jpg" class="img-circle img-md" alt="">
+                                </a>
+                            </div>
+
+                            <div class="media-body">
+                                <div class="media-content">Tolerantly some understood this stubbornly after snarlingly frog far added insect into snorted more auspiciously heedless drunkenly jeez foolhardy oh.</div>
+                                <span class="media-annotation display-block mt-10">Wed, 4:20 pm <a href="#"><i class="icon-pin-alt position-right text-muted"></i></a></span>
+                            </div>
+                        </li>
+
+                        <li class="media reversed">
+                            <div class="media-body">
+                                <div class="media-content">Satisfactorily strenuously while sleazily dear frustratingly insect menially some shook far sardonic badger telepathic much jeepers immature much hey.</div>
+                                <span class="media-annotation display-block mt-10">2 hours ago <a href="#"><i class="icon-pin-alt position-right text-muted"></i></a></span>
+                            </div>
+
+                            <div class="media-right">
+                                <a href="assets/images/placeholder.jpg">
+                                    <img src="assets/images/placeholder.jpg" class="img-circle img-md" alt="">
+                                </a>
+                            </div>
+                        </li>*@
+
+
+                </ul>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> @*This library is required in order to work signalR*@
+<script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var msgBody = document.querySelector('.scroll');
+        msgBody.scrollTop = msgBody.scrollHeight - msgBody.clientHeight;
+    });
+
+
+    var chatId = $('#chatId').val();
+    var senderId = $('#senderId').val();
+    var comId = $('#companyId').val();
+
+    $(function () {
+        var chat = $.connection.chatHub; //get connection with class named "ChatHub" in DataHub folder (ChatHub.cs)
+
+        $.connection.hub.start().done(function () {
+
+            $('#sendMsg').click(function () //calling the function named "SendMessage" in DataHub -> ChatHub.cs class
+            {
+                if ($('#message').val() == "" || $('#message').val() == " ") {
+                    alert("Empty Field Not Allowed")
+                }
+                else {
+                    var message = $('#message').val();
+
+                    chat.server.sendMessage(chatId, senderId, message); //function name must start with small word for calling, not defining
+
+                    $('#message').val('').focus();
+                }
+
+            });
+        });
+
+        chat.client.broadcastClientMessage = function (response, logedInId, companyId) //response function it will be called from the function named "SendMessage(...)" of ChatHub.cs class
+        {
+            if (response == "1") {
+                if (logedInId == senderId && companyId == comId) {
+                    $("#msgList").load(location.href + " #msgList");
+                }
+
+            }
+            else if (response == "2") {
+                if (logedInId == senderId && companyId == comId) {
+                    alert("Chat closed by Agent, Please check your Email")
+                    location.reload();
+                }
+            }
+            else {
+                alert("Message Sending failed!");
+            }
+
+        };
+
+        chat.client.broadcastUpdateClientChatHead = function (response, companyId, cId) {
+            if (response == "1") {
+                if (companyId == comId && cId == chatId) {
+                    $("#chatHead").load(location.href + " #chatHead");
+                }
+
+            }
+
+
+        };
+
+        chat.client.broadcastUserStatus = function (response, userId, companyId) {
+            if (response == "1") {
+                if (companyId == comId) {
+                    $("#chatHead").load(location.href + " #chatHead");
+                }
+            }
+        };
+
+
+    });
+</script>

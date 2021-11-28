@@ -1,0 +1,225 @@
+﻿
+@{ 
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Messages</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+    <!-- Global stylesheets -->
+    <link href="~/Content/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- Theme JS files -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/switchery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/ui/moment/moment.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/pickers/daterangepicker.js"></script>
+
+    <script type="text/javascript" src="~/Content/assets/js/core/app.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/pages/dashboard.js"></script>
+    <!-- /theme JS files -->
+    <!-- /Custom add libraries -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <link href="~/Content/assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/icons/fontawesome/fonts/fontawesome-webfont.svg" rel="stylesheet" type="text/css">
+
+
+    
+</head>
+<body>
+
+
+
+
+
+
+    <div class="jumbotron p-5 bg-white" style="border:1px solid lightgrey; height:550px;">
+
+        <!-- Page container -->
+        <div class="page-container">
+
+            <!-- Page content -->
+            <div class="page-content">
+
+                <!-- Main content -->
+                <div class="content-wrapper">
+                    <br />
+                    <br />
+                    <br />
+                    <div class="panel panel-body">
+
+
+                        <div class="text-center">
+
+                            <h5 class="content-group-lg">Login To Start Chat <small class="display-block">Enter your credentials</small></h5>
+                        </div>
+
+
+                        <input type="hidden" id="company" value="@ViewBag.company">
+                        <input type="hidden" id="isLogin" value="1">
+
+                        <div class="form-group has-feedback has-feedback-left" id="nameDiv" hidden>
+                            <input type="email" class="form-control" id="name" placeholder="Enter Your Full Name Here" >
+                            <div class="form-control-feedback">
+                                <i class="icon-user text-muted"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group has-feedback has-feedback-left">
+                            <input type="email" class="form-control" id="email" placeholder="Enter Your Email Here" >
+                            <div class="form-control-feedback">
+                                <i class="icon-mail5 text-muted"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group has-feedback has-feedback-left">
+                            <input type="password" class="form-control" id="password" placeholder="Enter You Password Here" >
+                            <div class="form-control-feedback">
+                                <i class="icon-lock2 text-muted"></i>
+                            </div>
+                        </div>
+
+                        <span class="text-danger" id="errorText"></span>
+
+                        <div class="form-group">
+                            <a class="btn bg-blue-400 btn-block" onclick="validateLogin()">Lets Chat! <i class="icon-arrow-right14 position-right" id="subIcon"></i></a>
+                        </div>
+
+                        <a class="pull-right text-danger-300" onclick="toggleLogin()"><span id="regText">Register?</span></a>
+                        <br />
+
+
+
+
+                    </div>
+                    <!-- /advanced login -->
+
+                </div>
+                <!-- /main content -->
+
+            </div>
+            <!-- /page content -->
+
+        </div>
+        <!-- /page container -->
+
+    </div>
+
+
+
+
+    <script>
+
+        function toggleLogin()
+        {
+            $('#name').val("");
+
+            if ($('#regText').text() == "Register?")
+            {
+                $('#regText').text("Login?");
+                $('#regText').removeClass("text-danger-300");
+                $('#regText').addClass("text-info");
+
+                $('#isLogin').val("0");
+
+                $('#nameDiv').show();
+            }
+            else
+            {
+                $('#regText').text("Register?");
+                $('#regText').removeClass("text-info");
+                $('#regText').addClass("text-danger-300");
+
+                $('#isLogin').val("1");
+
+
+                $('#nameDiv').hide();
+            }
+        }
+
+        function validateLogin()
+        {
+            var company = $('#company').val();
+            var isLogin = $('#isLogin').val();
+            var name = $('#name').val();
+            var email = $('#email').val();
+            var password = $('#password').val();
+            if (isLogin == 0 && (name == "" || email == "" || password == ""))
+            {
+                if (password == "") {
+                    $('#errorText').text("Please enter your Password");
+                }
+                if (email == "") {
+                    $('#errorText').text("Please enter your Email");
+                }
+                if (name == "") {
+                    $('#errorText').text("Please enter your Name");
+                }
+            }
+            else if (isLogin == 1 && (email == "" || password == "")) {
+                if (password == "") {
+                    $('#errorText').text("Please enter your Password");
+                }
+                if (email == "") {
+                    $('#errorText').text("Please enter your Email");
+                }
+            }
+            else
+            {
+                $('#subIcon').removeClass("icon-arrow-right14");
+                $('#subIcon').addClass("icon-spinner spinner");
+
+                $.ajax({
+                    dataType: "json",
+                    type: "POST",
+                    url: '@Url.Action("PostRegister", "ClientSupport")',
+                    data: { company: company, email: email, password: password, name: name, isLogin: isLogin },
+                    success: function (response) {
+                        if (response == "1") {
+                            location.reload();
+                        }
+                        else {
+                            $('#errorText').text(response);
+
+                            $('#subIcon').addClass("icon-arrow-right14");
+                            $('#subIcon').removeClass("icon-spinner spinner");
+                        }
+                    },
+                    error: function (response)
+                    {
+                        alert('Something Wrong');
+
+                        $('#subIcon').addClass("icon-arrow-right14");
+                        $('#subIcon').removeClass("icon-spinner spinner");
+                    }
+
+                });
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

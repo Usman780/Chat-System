@@ -1,0 +1,143 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    DatabaseEntities de = new DatabaseEntities();
+
+    var identity = (System.Security.Claims.ClaimsPrincipal)System.Threading.Thread.CurrentPrincipal;
+    var id = identity.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Sid).Select(c => c.Value).SingleOrDefault();
+    User loggedinUser = new UserBL().GetUserById(Convert.ToInt32(id), de);
+
+}
+
+@{
+    ViewBag.Title = "Agent Dashboard";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<input type="hidden" id="agentId" value="@loggedinUser.Id" />
+<input type="hidden" id="companyId" value="@loggedinUser.CompanyId" />
+
+<div class="row" style="min-height:700px" >
+
+    <br />
+    <center>
+        <h3><u>Queued Chats</u></h3>
+    </center>
+
+    <div class="col-lg-3"></div>
+    <div class="col-lg-6 m-20 p-5" style="border:1px solid lightgrey; border-radius:5px;">
+        <div id="msgRequest">
+            <br />
+            @if (ViewBag.MsgList.Count > 0)
+            {
+                foreach (User m in ViewBag.MsgList)
+                {
+                    <a id="@m.Id" class="clientReq" onclick="OpenRequest('@m.Id')">
+                        <div class="p-10" style="border:1px solid black;">
+                            <span class="text-bold text-size-large">@m.Name</span>
+                            <div class="badge badge-danger pull-right">@m.IsActive</div>
+                        </div>
+                    </a>
+
+                    <br />
+                }
+
+            }
+            else
+            {
+                <div class="p-10" style="border:1px solid black;">
+                    <span class="text-bold text-size-large text-danger">No Requests!</span>
+                </div>
+                <br />
+            }
+        </div>
+    </div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> @*This library is required in order to work signalR*@
+<script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script type="text/javascript">
+
+    var agentId = $('#agentId').val();
+    var comId = $('#companyId').val();
+
+    function OpenRequest(chatId) {
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: '@Url.Action("UpdateChatRequests", "Agent")',
+            data: { companyId: comId, chatId: chatId, agentId: agentId },
+            success: function (response)
+            {
+                if (response == "1") {
+                    location.reload();
+                }
+                else {
+                    alert("Somethings' Wrong");
+                }
+            },
+            error: function (response)
+            {
+                alert('Ajax Failed');
+            }
+
+        });
+    }
+
+
+    $(function () {
+        var chat = $.connection.chatHub; //get connection with class named "ChatHub" in DataHub folder (ChatHub.cs)
+
+        $.connection.hub.start().done(function () {
+
+            
+            @*$('.clientReq').click(function () //calling the function named "SendMessage" in DataHub -> ChatHub.cs class
+            {
+                var chatId = jQuery(this).attr("id");
+
+                $.ajax({
+                    dataType: "json",
+                    type: "POST",
+                    url: '@Url.Action("UpdateChatRequests", "Agent")',
+                    data: { companyId: comId, chatId: chatId, agentId: agentId },
+                    success: function (response)
+                    {
+                        if (response == "1") {
+                            location.reload();
+                        }
+                        else {
+                            alert("Somethings' Wrong");
+                        }
+                    },
+                    error: function (response)
+                    {
+                        alert('Ajax Failed');
+                    }
+
+                });
+
+            });*@
+        });
+
+
+        chat.client.broadcastUpdateChatRequests = function (response, companyId) //response function it will be called from the function named "SendMessage(...)" of ChatHub.cs class
+        {
+            if (response == "1")
+            {
+                if (companyId == comId)
+                {
+                    $("#msgRequest").empty();
+                    $("#msgRequest").load(location.href + " #msgRequest");
+                }
+            }
+            else {
+                alert("Message Updation failed!");
+            }
+
+        };
+
+    });
+</script>

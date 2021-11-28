@@ -1,0 +1,135 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    Layout = null;
+
+
+    DatabaseEntities de = new DatabaseEntities();
+
+    var identity = (System.Security.Claims.ClaimsPrincipal)System.Threading.Thread.CurrentPrincipal;
+    var id = identity.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Sid).Select(c => c.Value).SingleOrDefault();
+    User loggedinUser = new UserBL().GetUserById(Convert.ToInt32(id), de);
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Messages</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/Content/assets/images/Favicons/C-Fav.jpg">
+
+
+    <!-- Global stylesheets -->
+    <link href="~/Content/assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/core.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/components.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/colors.css" rel="stylesheet" type="text/css">
+    <!-- /global stylesheets -->
+    <!-- Core JS files -->
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/pace.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/jquery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/core/libraries/bootstrap.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/loaders/blockui.min.js"></script>
+    <!-- /core JS files -->
+    <!-- Theme JS files -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/switchery.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/styling/uniform.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/ui/moment/moment.min.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/plugins/pickers/daterangepicker.js"></script>
+
+    <script type="text/javascript" src="~/Content/assets/js/core/app.js"></script>
+    <script type="text/javascript" src="~/Content/assets/js/pages/dashboard.js"></script>
+    <!-- /theme JS files -->
+    <!-- /Custom add libraries -->
+
+    <script type="text/javascript" src="~/Content/assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <link href="~/Content/assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">
+    <link href="~/Content/assets/css/icons/fontawesome/fonts/fontawesome-webfont.svg" rel="stylesheet" type="text/css">
+
+
+    <style>
+        ::-webkit-scrollbar {
+            width: .5em;
+            height: 2em
+        }
+
+        ::-webkit-scrollbar-button {
+            background: #ccc
+        }
+
+        ::-webkit-scrollbar-track-piece {
+            background: #ccc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #42a5f5
+        }
+
+
+    </style>
+</head>
+<body id="chatBody">
+
+
+
+
+
+
+    <div class="jumbotron p-5 bg-white" style="border:1px solid lightgrey; border-radius:5px;">
+        <div id="chatHead">
+            
+            <div class="panel-heading" style="background-color:#0150A1; height:62px;">
+                
+                <h6 class="panel-title text-white text-bold">
+                    @if (ViewBag.Message == "1")
+                    {
+                    <span><i class="note-icon-chain-broken text-danger"></i>&nbsp; Not Available!</span>
+                    }
+                    else
+                    {
+                        <span><i class="icon-exclamation text-danger"></i>&nbsp; Somethings' Wrong!</span>
+                    }
+                </h6>
+                
+
+            </div>
+        </div>
+        <div class="panel-body text-center" style="height:465px;">
+            @if (ViewBag.Message == "1")
+            {
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <h3 class="">Do not have permission to use this sevice</h3>
+            }
+            else
+            {
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <h3 class="">Somethings' wrong happened. Please refresh page or contact Admin</h3>
+            }
+
+
+        </div>
+    </div>
+
+</body>
+</html>

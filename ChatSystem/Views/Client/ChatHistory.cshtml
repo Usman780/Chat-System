@@ -1,0 +1,153 @@
+﻿@using ChatSystem.Models;
+@using ChatSystem.BL;
+@using ChatSystem.Helping_Clesses;
+@{
+    DatabaseEntities de = new DatabaseEntities();
+
+    var identity = (System.Security.Claims.ClaimsPrincipal)System.Threading.Thread.CurrentPrincipal;
+    var id = identity.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Sid).Select(c => c.Value).SingleOrDefault();
+    User loggedinUser = new UserBL().GetUserById(Convert.ToInt32(id), de);
+
+}
+
+@{
+    ViewBag.Title = "Chat History";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+
+
+
+
+
+<br />
+<div class="clearfix">
+    <div>
+        <a href="@Url.Action("NewChat","Client", new { companyId = StringCipher.Encrypt(loggedinUser.CompanyId.ToString())})" class="btn buttonColor text-white text-bold pull-right m-5">New Chat</a>
+    </div>
+    <br />
+    <br />
+    <h3 class="text-center">
+        <u>Chat History</u>
+    </h3>
+
+
+</div>
+<br />
+<div style="min-height:700px">
+    <div style="font-weight:bold; color:@ViewBag.Color ; margin-left:10px;" id="alertMsg">
+        @ViewBag.Message
+    </div>
+
+    <div class="datatable-scroll table-bordered p-10">
+
+        <table class="table no-footer table-responsive" id="chatTable">
+
+            <thead class="navbarColor">
+                <tr>
+
+                    <th class="text-bold">
+                        Agent
+                    </th>
+                    <th class="text-bold">
+                        Started At
+                    </th>
+                    <th class="text-bold">
+                        Closed At
+                    </th>
+                    <th class="text-bold">
+                        Total Messages
+                    </th>
+
+
+
+                </tr>
+            </thead>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    $('#chatTable').DataTable(
+    {
+        "ajax":
+        {
+            "url": '@Url.Action("GetChatList", "Client")',
+            "type": "POST",
+            "datatype": "json",
+        },
+
+        'columnDefs':
+        [
+            {
+                "targets": 0,
+                'className': 'col-lg-2',
+
+                "render": function (data, type, full, meta)
+                {
+                    return full.AgentName ;
+                }
+            },
+            {
+                "targets": 1,
+                'className': 'col-lg-2',
+
+                "render": function (data, type, full, meta)
+                {
+                    return full.StartedAt ;
+                }
+            },
+            {
+                "targets": 2,
+                'className': 'col-lg-3',
+
+                "render": function (data, type, full, meta)
+                {
+                    return full.ClosedAt ;
+                }
+            },
+            {
+                "targets": 3,
+                'className': 'col-lg-2',
+
+                "render": function (data, type, full, meta)
+                {
+                    return full.TotalMessages ;
+                }
+            },
+            //{
+            //    "targets": 4,
+            //    'className': 'col-lg-3',
+            //    'className': 'text-center',
+
+            //    "render": function (data, type, full, meta)
+            //    {
+            //        return ' <ul class="icons-list text-center"> <li class="dropdown"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="icon-menu9"></i> </a> <ul class="dropdown-menu dropdown-menu-right">' +
+            //            '<li> <a onclick="editUserFunction(' + full.Id + ')"><i class="icon-pencil"></i> Edit</a></li >' +
+            //            ' <li><a class="text-danger" onclick="deleteFunction(' + full.Id + ')" data-toggle="modal" data-target="#deleteModal"><i class="glyphicon glyphicon-floppy-remove"></i> Delete</a></li>' +
+            //            '</ul ></li ></ul > ';
+            //    }
+            //},
+
+        ],
+        "serverSide": "true",
+        "processing": "true",
+        "language":
+        {
+            "processing": "<img src='../Content/assets/images/loading.gif' width='150'/>"
+        },
+
+
+    });
+
+</script>
+
+
+
+
+
